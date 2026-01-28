@@ -1,0 +1,162 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "ESCAPE TSUNAMI | Fyy x Mizuu",
+   LoadingTitle = "Interface Loading...",
+   LoadingSubtitle = "by Mizu",
+   ConfigurationSaving = { Enabled = false },
+   KeySystem = false
+})
+
+-- Variables
+local lp = game.Players.LocalPlayer
+local rs = game.GetService(game, "RunService")
+local pps = game.GetService(game, "ProximityPromptService")
+local uis = game.GetService(game, "UserInputService")
+
+local walkspeedValue = 50
+local autosteal = false
+local instanthold = false
+local speedEnabled = false
+local infJump = false
+local noclip = false
+local teleportPos = Vector3.new(756.079, 3.5, -100.782)
+
+-- Tabs
+local MainTab = Window:CreateTab("Main", 4483362458)
+local PlayerTab = Window:CreateTab("Player", 4483362458)
+local TeleportTab = Window:CreateTab("Teleports", 4483362458)
+
+-- Main Functions
+MainTab:CreateToggle({
+   Name = "Auto Steal",
+   CurrentValue = false,
+   Flag = "AS_Toggle",
+   Callback = function(Value)
+      autosteal = Value
+   end,
+})
+
+MainTab:CreateToggle({
+   Name = "Instant Hold",
+   CurrentValue = false,
+   Flag = "IH_Toggle",
+   Callback = function(Value)
+      instanthold = Value
+   end,
+})
+
+MainTab:CreateButton({
+   Name = "Manual Steal TP",
+   Callback = function()
+      if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+         lp.Character.HumanoidRootPart.CFrame = CFrame.new(teleportPos)
+      end
+   end,
+})
+
+-- Player Functions
+PlayerTab:CreateToggle({
+   Name = "Enable Speed",
+   CurrentValue = false,
+   Flag = "Speed_Toggle",
+   Callback = function(Value)
+      speedEnabled = Value
+   end,
+})
+
+PlayerTab:CreateSlider({
+   Name = "WalkSpeed",
+   Range = {16, 250},
+   Increment = 1,
+   Suffix = " Speed",
+   CurrentValue = 50,
+   Flag = "WS_Slider",
+   Callback = function(Value)
+      walkspeedValue = Value
+   end,
+})
+
+PlayerTab:CreateToggle({
+   Name = "Noclip",
+   CurrentValue = false,
+   Flag = "NC_Toggle",
+   Callback = function(Value)
+      noclip = Value
+   end,
+})
+
+PlayerTab:CreateToggle({
+   Name = "Infinite Jump",
+   CurrentValue = false,
+   Flag = "IJ_Toggle",
+   Callback = function(Value)
+      infJump = Value
+   end,
+})
+
+-- Teleports
+local Zones = {
+   ["OG Zone"] = Vector3.new(800.21, -2.0, 4753.73),
+   ["Exclusive Zone"] = Vector3.new(795.44, -2.0, 3417.42),
+   ["Divine Zone"] = Vector3.new(787.50, -2.0, 2445.51),
+   ["Brainrot God Zone"] = Vector3.new(783.14, -2.0, 1729.48),
+   ["Secret Zone"] = Vector3.new(789.87, -2.0, 1156.83),
+   ["Mythic Zone"] = Vector3.new(785.79, -2.0, 662.23)
+}
+
+for Name, Pos in pairs(Zones) do
+   TeleportTab:CreateButton({
+      Name = Name,
+      Callback = function()
+         if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+            lp.Character.HumanoidRootPart.CFrame = CFrame.new(Pos)
+         end
+      end,
+   })
+end
+
+-- Logic Loop
+rs.Stepped:Connect(function()
+   if not lp.Character then return end
+   
+   -- Speed Logic
+   if speedEnabled and lp.Character:FindFirstChild("Humanoid") then
+      lp.Character.Humanoid.WalkSpeed = walkspeedValue
+   end
+   
+   -- Noclip Logic
+   if noclip then
+      for _, v in pairs(lp.Character:GetDescendants()) do
+         if v:IsA("BasePart") then
+            v.CanCollide = false
+         end
+      end
+   end
+end)
+
+-- Jump & Prompt Logic
+uis.JumpRequest:Connect(function()
+   if infJump and lp.Character and lp.Character:FindFirstChild("Humanoid") then
+      lp.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+   end
+end)
+
+pps.PromptButtonHoldBegan:Connect(function(prompt)
+   if instanthold then
+      prompt.HoldDuration = 0
+      if fireproximityprompt then fireproximityprompt(prompt) end
+   end
+   
+   if autosteal and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+      lp.Character.HumanoidRootPart.CFrame = CFrame.new(teleportPos)
+      task.wait(0.05)
+      if fireproximityprompt then fireproximityprompt(prompt) end
+   end
+end)
+
+Rayfield:Notify({
+   Title = "Loaded Successfully",
+   Content = "Script by Mizu is ready.",
+   Duration = 5
+})
